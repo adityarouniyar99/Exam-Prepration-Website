@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BePrepareForExam - Multi-Module Quiz Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.35s ease-out; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-thumb { background: rgba(100,116,139,0.4); border-radius: 8px; }
+    </style>
+    <script>
+        tailwind.config = {
+            darkMode: 'class'
+        }
+    </script>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-200">
+
+    <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50 shadow-sm transition-colors duration-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2">
+            <div class="flex items-center space-x-3 cursor-pointer shrink-0" onclick="handleLogoClick()">
+                <div class="bg-indigo-600 text-white p-2 rounded-xl shadow-md shadow-indigo-200 dark:shadow-none">
+                    <i class="fa-solid fa-graduation-cap text-xl"></i>
+                </div>
+                <span class="font-bold text-xl tracking-tight bg-gradient-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-400 bg-clip-text text-transparent hidden sm:inline">BePrepareForExam</span>
+            </div>
+
+            <div class="flex items-center gap-3 sm:gap-6">
+                <div id="header-student-badge" class="hidden items-center gap-2 bg-slate-100 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 rounded-xl pl-3 pr-2 py-1.5">
+                    <i class="fa-solid fa-circle-user text-indigo-500 dark:text-indigo-400"></i>
+                    <div class="leading-tight">
+                        <div class="text-xs font-semibold text-slate-800 dark:text-white" id="header-student-name">-</div>
+                        <div class="text-[10px] text-slate-400 dark:text-slate-400 font-mono" id="header-student-id">-</div>
+                    </div>
+                    <button onclick="openEditProfile()" title="Edit profile" class="text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition px-1">
+                        <i class="fa-solid fa-pen text-xs"></i>
+                    </button>
+                </div>
+
+                <div class="flex items-center space-x-2">
+                    <i class="fa-regular fa-sun text-slate-400 dark:text-slate-500 text-xs"></i>
+                    <button onclick="toggleThemeMode()" class="w-12 h-6 bg-slate-200 dark:bg-indigo-600 rounded-full p-1 relative transition-colors duration-300 focus:outline-none" aria-label="Toggle Theme Mode Switch">
+                        <div id="theme-slider-thumb" class="w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 translate-x-0 dark:translate-x-6"></div>
+                    </button>
+                    <i class="fa-regular fa-moon text-slate-400 dark:text-indigo-400 text-xs"></i>
+                </div>
+
+                <div id="header-nav-actions" class="hidden items-center space-x-3">
+                    <button onclick="handleLogoClick()" class="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition hidden md:inline">Dashboard</button>
+                    <button onclick="clearHistory()" class="text-xs bg-slate-100 dark:bg-slate-700 hover:bg-rose-50 dark:hover:bg-rose-950 text-slate-600 dark:text-slate-300 hover:text-rose-600 dark:hover:text-rose-400 px-3 py-1.5 rounded-lg font-medium transition">Clear History</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- LOGIN / PROFILE SETUP VIEW -->
+        <div id="view-login" class="hidden">
+            <div class="min-h-[70vh] flex items-center justify-center fade-in">
+                <div class="w-full max-w-md">
+                    <div class="text-center mb-6">
+                        <div class="inline-flex items-center justify-center bg-indigo-600 text-white p-4 rounded-2xl shadow-lg shadow-indigo-200 dark:shadow-none mb-4">
+                            <i class="fa-solid fa-graduation-cap text-3xl"></i>
+                        </div>
+                        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">Welcome to BePrepareForExam</h1>
+                        <p class="text-slate-500 dark:text-slate-400 text-sm mt-2">Set up your student profile to begin practicing. You'll only need to do this once on this device.</p>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl p-6 sm:p-8 space-y-5">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">Full Student Name <span class="text-rose-500">*</span></label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400"><i class="fa-regular fa-user"></i></span>
+                                <input type="text" id="login-input-name" class="w-full pl-9 pr-3 py-2.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm outline-none text-slate-800 dark:text-white transition" placeholder="John Doe">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">Student ID <span class="text-rose-500">*</span></label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400"><i class="fa-regular fa-id-badge"></i></span>
+                                <input type="text" id="login-input-id" class="w-full pl-9 pr-3 py-2.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm outline-none text-slate-800 dark:text-white transition" placeholder="STU-2026-987">
+                            </div>
+                        </div>
+                        <p id="login-error" class="text-xs text-rose-500 hidden">Please fill in both your name and student ID.</p>
+                        <button onclick="handleLoginSubmit()" class="w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white text-sm font-semibold py-3 rounded-xl shadow-md transition flex items-center justify-center gap-2">
+                            Continue to Dashboard <i class="fa-solid fa-arrow-right text-xs"></i>
+                        </button>
+                        <p class="text-[11px] text-center text-slate-400 dark:text-slate-500">Your details are saved only on this device and used to label your test attempts.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-dashboard" class="space-y-8 hidden">
+            <div class="bg-gradient-to-r from-indigo-600 to-violet-700 dark:from-indigo-700 dark:to-violet-800 rounded-2xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+                <div class="relative z-10 max-w-2xl">
+                    <h1 class="text-2xl sm:text-4xl font-bold mb-2">Welcome to your Exam Suite</h1>
+                    <p class="text-indigo-100 dark:text-slate-200 text-sm sm:text-base mb-2" id="dashboard-greeting">Select a module below and test your comprehension over unlimited dynamic attempts.</p>
+                    <p class="text-indigo-200/80 dark:text-slate-300/80 text-xs sm:text-sm">Each attempt shuffles questions and options for a fresh practice run.</p>
+                </div>
+                <div class="absolute right-0 bottom-0 opacity-10 transform translate-x-10 translate-y-10 pointer-events-none">
+                    <i class="fa-solid fa-book-open text-[200px]"></i>
+                </div>
+            </div>
+
+            <div>
+                <h2 class="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-clipboard-list text-indigo-600 dark:text-indigo-400"></i> Available Practice Modules
+                </h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5 shadow-sm hover:shadow-md transition flex flex-col justify-between h-[210px] w-full max-w-[360px]">
+                        <div>
+                            <h3 class="font-bold text-lg text-slate-900 dark:text-white leading-tight">ES Practice Test</h3>
+                            <p class="text-slate-400 dark:text-slate-400 text-xs mt-1 line-clamp-2">Comprehensive evaluation covering units, acts, policies, parameters, and foundational ecosystems concepts.</p>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex flex-wrap gap-1.5">
+                                <span class="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-[11px] px-2 py-0.5 rounded font-medium"><i class="fa-regular fa-file-lines mr-1"></i>144 Qs</span>
+                                <span class="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-[11px] px-2 py-0.5 rounded font-medium"><i class="fa-regular fa-clock mr-1"></i>3 Hrs</span>
+                                <span class="bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 text-[11px] px-2 py-0.5 rounded font-semibold">1 Mark</span>
+                            </div>
+                            <button onclick="launchTest('ES')" class="w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white text-sm font-semibold py-2 rounded-lg transition flex items-center justify-center gap-2 shadow-sm">
+                                Launch ES Test <i class="fa-solid fa-arrow-right text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5 shadow-sm hover:shadow-md transition flex flex-col justify-between h-[210px] w-full max-w-[360px]">
+                        <div>
+                            <h3 class="font-bold text-lg text-slate-900 dark:text-white leading-tight">IKS Practice Test</h3>
+                            <p class="text-slate-400 dark:text-slate-400 text-xs mt-1 line-clamp-2">Bharatiya Knowledge System comprehensive practice layout covering ancient sciences, arts, philosophy, and historical scriptures.</p>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex flex-wrap gap-1.5">
+                                <span class="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-[11px] px-2 py-0.5 rounded font-medium"><i class="fa-regular fa-file-lines mr-1"></i>155 Qs</span>
+                                <span class="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-[11px] px-2 py-0.5 rounded font-medium"><i class="fa-regular fa-clock mr-1"></i>3 Hrs</span>
+                                <span class="bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 text-[11px] px-2 py-0.5 rounded font-semibold">1 Mark</span>
+                            </div>
+                            <button onclick="launchTest('IKS')" class="w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white text-sm font-semibold py-2 rounded-lg transition flex items-center justify-center gap-2 shadow-sm">
+                                Launch IKS Test <i class="fa-solid fa-arrow-right text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div>
+                <h2 class="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-history text-indigo-600 dark:text-indigo-400"></i> Performance Dashboard & History
+                </h2>
+                <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm overflow-hidden">
+                    <div id="history-empty" class="p-8 text-center text-slate-400 dark:text-slate-500 hidden">
+                        <i class="fa-solid fa-folder-open text-4xl mb-3 block"></i>
+                        <span class="text-sm">No tests attempted yet. Your results will display here.</span>
+                    </div>
+                    <div id="history-table-container" class="overflow-x-auto hidden">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-700 text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 tracking-wider">
+                                    <th class="px-6 py-4">Timestamp</th>
+                                    <th class="px-6 py-4">Student Info</th>
+                                    <th class="px-6 py-4">Module</th>
+                                    <th class="px-6 py-4">Score</th>
+                                    <th class="px-6 py-4">Percentage</th>
+                                    <th class="px-6 py-4">Accuracy Matrix</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-rows" class="divide-y divide-slate-100 dark:divide-slate-700 text-sm">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-quiz" class="space-y-6 hidden">
+            <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm overflow-hidden">
+                <div class="p-4 bg-slate-900 dark:bg-slate-950 text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-user text-indigo-400 text-sm"></i>
+                            <span class="text-xs text-slate-400 font-medium">Student:</span>
+                            <span class="text-sm font-semibold text-white" id="display-student-name">-</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-id-card text-indigo-400 text-sm"></i>
+                            <span class="text-xs text-slate-400 font-medium">ID:</span>
+                            <span class="text-sm font-semibold text-white" id="display-student-id">-</span>
+                        </div>
+                    </div>
+                    <div class="bg-rose-600 text-white font-mono px-4 py-1.5 rounded-lg border border-rose-500 shadow-sm flex items-center gap-2 self-stretch md:self-auto justify-center">
+                        <i class="fa-solid fa-hourglass-half animate-spin text-xs"></i>
+                        <span class="text-xs uppercase font-sans tracking-wider text-rose-100 font-bold">Time Left:</span>
+                        <span class="text-base font-bold tracking-widest" id="quiz-timer-countdown">03:00:00</span>
+                    </div>
+                </div>
+                <div class="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-t border-slate-100 dark:border-slate-700">
+                    <div>
+                        <h2 class="font-bold text-lg text-slate-900 dark:text-white" id="quiz-title-display">Practice Assessment</h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Questions and options are dynamically shuffled. Unanswered questions count as 0 marks.</p>
+                    </div>
+                    <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
+                        <div class="text-sm font-semibold bg-indigo-50 dark:bg-slate-700 text-indigo-700 dark:text-indigo-400 px-4 py-2 rounded-xl border border-indigo-100 dark:border-slate-600" id="quiz-total-badge">
+                            Total Items: 0
+                        </div>
+                        <button onclick="submitQuiz()" class="bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white font-medium px-6 py-2 rounded-xl transition shadow-sm">
+                            Submit Examination
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="quiz-questions-form" class="space-y-6"></div>
+
+            <div class="bg-white dark:bg-slate-800 p-4 border border-slate-200 dark:border-slate-700 rounded-xl shadow-md flex justify-between items-center sticky bottom-4">
+                <span class="text-sm text-slate-500 dark:text-slate-400 font-medium" id="quiz-completion-status">0 Questions Answered</span>
+                <button onclick="submitQuiz()" class="bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white font-semibold px-6 py-2.5 rounded-xl transition shadow-sm">
+                    Finish & Compile Result
+                </button>
+            </div>
+        </div>
+
+        <div id="view-results" class="space-y-8 hidden">
+            <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 sm:p-8 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
+                <div class="space-y-2 text-center md:text-left">
+                    <span class="bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-400 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Evaluation Complete</span>
+                    <h2 class="text-3xl font-bold text-slate-900 dark:text-white" id="result-title-display">Your Diagnostics Overview</h2>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm max-w-md">Review incorrect answers matching standard expected keys versus option structures selected.</p>
+                </div>
+                <div class="flex items-center gap-6">
+                    <div class="text-center bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 px-6 py-4 rounded-xl">
+                        <span class="text-xs text-slate-400 dark:text-slate-400 font-semibold uppercase tracking-wider block mb-1">Score Matrix</span>
+                        <span class="text-3xl font-bold text-slate-900 dark:text-white" id="result-score-fraction">0/0</span>
+                    </div>
+                    <div class="text-center bg-indigo-600 dark:bg-indigo-500 text-white px-6 py-4 rounded-xl shadow-lg">
+                        <span class="text-indigo-200 dark:text-indigo-100 text-xs font-semibold uppercase tracking-wider block mb-1">Final Metric</span>
+                        <span class="text-3xl font-bold" id="result-percentage">0%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white">Question-by-Question Tickets</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Correct answers are highlighted in emerald; mistakes are tracked in crimson.</p>
+                </div>
+                <div class="flex gap-3 w-full sm:w-auto">
+                    <button onclick="showView('dashboard')" class="flex-1 sm:flex-initial bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-medium px-5 py-2.5 rounded-xl transition text-sm">
+                        Return Dashboard
+                    </button>
+                    <button onclick="reAttemptCurrentModule()" class="flex-1 sm:flex-initial bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white font-medium px-5 py-2.5 rounded-xl transition text-sm shadow-sm">
+                        Re-Attempt Test
+                    </button>
+                </div>
+            </div>
+
+            <div id="results-tickets-container" class="space-y-4"></div>
+        </div>
+
+    </main>
+
+    <div id="modal-edit-profile" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm hidden">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl max-w-md w-full shadow-2xl border border-slate-100 dark:border-slate-700 overflow-hidden transform transition-all fade-in">
+            <div class="p-6 bg-slate-50 dark:bg-slate-700/50 border-b border-slate-100 dark:border-slate-700">
+                <h3 class="font-bold text-xl text-slate-900 dark:text-white">Edit Student Profile</h3>
+                <p class="text-xs text-slate-500 mt-1">Update your name or student ID. This will be saved on this device.</p>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Full Student Name <span class="text-rose-500">*</span></label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400"><i class="fa-regular fa-user"></i></span>
+                        <input type="text" id="edit-input-name" class="w-full pl-9 pr-3 py-2 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 text-sm outline-none text-slate-800 dark:text-white transition">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Student ID <span class="text-rose-500">*</span></label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400"><i class="fa-regular fa-id-badge"></i></span>
+                        <input type="text" id="edit-input-id" class="w-full pl-9 pr-3 py-2 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 text-sm outline-none text-slate-800 dark:text-white transition">
+                    </div>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="closeEditProfile()" class="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-sm font-medium py-2.5 rounded-xl transition">Cancel</button>
+                    <button type="button" onclick="saveEditProfile()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white text-sm font-semibold py-2.5 rounded-xl shadow-md transition">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 py-6 text-center text-xs text-slate-400 mt-12 transition-colors duration-200">
+        &copy; 2026 BePrepareForExam Dashboard Engine. Secure Core LocalStorage Instance Runtime.
+    </footer>
+
+    <script>
+        // ES Question Bank (144 Questions) — sourced from ES_question.xlsx
+        const esQuestionBank = [{"id": 1, "q": "IMD is also known as......", "o": ["International Meteorological Department", "Indian Mining Department", "Indian Maritime Department", "Indian Meteorological Department"], "a": "Indian Meteorological Department"}, {"id": 2, "q": "How much India land areas are prone to flood and river erosion?", "o": ["12%", "15%", "20%", "25%"], "a": "12%"}, {"id": 3, "q": "The full name of AES is.", "o": ["Advanced Encephalitis Syndrome", "Acute Encephalitis Syndrome", "Abnormal Encephalitis Syndrome", "Additional Encephalitis Syndrome"], "a": "Acute Encephalitis Syndrome"}, {"id": 4, "q": "El-nino is the result of.", "o": ["Drought", "Climate Change", "Earthquake", "Eclipse"], "a": "Climate Change"}, {"id": 5, "q": "Flood Forecasting and Warning system of India works under the guidance of...", "o": ["Central Water Commission", "Ministry of Environment, Forest & climate change", "State government", "Department of Science & Technology"], "a": "Central Water Commission"}, {"id": 6, "q": ".....can be defined as the occurrence of an illness or other health-related event that is clearly in excess of unexpected occurrence.", "o": ["AIDS", "Epidemic", "TB", "None of these"], "a": "Epidemic"}, {"id": 7, "q": "Full form of CPCB is.", "o": ["Central Population Control Board", "Common Population Control Board", "Central Public Control Board", "Central Pollution Control Board"], "a": "Central Pollution Control Board"}, {"id": 8, "q": "What is UNEP?", "o": ["United Nations Environment Policy", "United Nations Environment Programme", "United Nations Education Programme", "United Nations Environmental Protection"], "a": "United Nations Environment Programme"}, {"id": 9, "q": "Who has given the concept of biodiversity hot spots?", "o": ["Tansley", "Clement", "Myer", "Grinnell"], "a": "Myer"}, {"id": 10, "q": "Dr Salim Ali Centre for Ornithology is located at.......................", "o": ["Hyderabad", "Banglore", "Coimbatore", "Chennai"], "a": "Coimbatore"}, {"id": 11, "q": "Minimata disease occurred due to......", "o": ["Cadmium pollution", "Selenium pollution", "Arsenic pollution", "Mercury pollution"], "a": "Mercury pollution"}, {"id": 12, "q": "Clostridium botulinum is responsible for..........", "o": ["Dengue", "Cholera", "Food poisoning", "Diarrhea"], "a": "Food poisoning"}, {"id": 13, "q": "Which one is responsible for tooth disease in human beings?", "o": ["Nitrate", "Fluoride", "Phosphate", "Sulphate"], "a": "Fluoride"}, {"id": 14, "q": "The rate of change in temperature observed while moving upward through the earth's atmosphere is called as.............", "o": ["Lapse rate", "Isobaric rate", "Pulse rate", "Isochoric rate"], "a": "Lapse rate"}, {"id": 15, "q": "Lakes that have high nutrient concentration are referred as....", "o": ["Thermotrophic", "Oligotrophic", "Eutrophic", "Dystrophic"], "a": "Eutrophic"}, {"id": 16, "q": "PAN is a type of....", "o": ["Fossil fuel", "Halones", "Photochemical smog", "Ozone depleting substance"], "a": "Photochemical smog"}, {"id": 17, "q": "The full name of HCFC is..", "o": ["Hydrocarbon and chlorofluorocarbons", "Heavy chlorofluorocarbons", "High chlorofluorocarbons", "Hydro-chlorofluorocarbons"], "a": "Hydro-chlorofluorocarbons"}, {"id": 18, "q": "Which of the following plants is extremely sensitive towards sulphur dioxide?", "o": ["Tomato", "Onion", "Potato", "Corn"], "a": "Tomato"}, {"id": 19, "q": "Which of the following type of pollution is Cultural eutrophication?", "o": ["Noise pollution", "Thermal pollution", "Soil pollution", "Water pollution"], "a": "Water pollution"}, {"id": 20, "q": "What is the significance of the ionosphere?", "o": ["Aviation movements", "High frequency radio transmission", "Regulates weather", "All of these"], "a": "High frequency radio transmission"}, {"id": 21, "q": "The negative effects of climate change will include....................", "o": ["Flooding", "Water scarcity", "Less production", "All of these"], "a": "All of these"}, {"id": 22, "q": "Photochemical Smog is the resultant of", "o": ["Air pollution", "Landslide", "Soil pollution", "Earthquake"], "a": "Air pollution"}, {"id": 23, "q": "Which one is emitted by automobile exhaust?", "o": ["Fluoride", "Arsenic", "Nitrate", "Chromium"], "a": "Nitrate"}, {"id": 24, "q": "Disaster management cycle can be divided into.", "o": ["Pre and Post Disaster Management", "Response and Recovery", "Mitigation and Prevention", "Risk and Chance"], "a": "Pre and Post Disaster Management"}, {"id": 25, "q": "Urban flooding is the resultant of..", "o": ["Poor Sewerage Management", "Siltation of drains", "Climate change", "All of these"], "a": "All of these"}, {"id": 26, "q": "Which one the most dangerous waste for living beings?", "o": ["Oil spills", "Plastic wastes", "Radioactive waste", "Biomedical wastes"], "a": "Radioactive waste"}, {"id": 27, "q": "Which one is not a contagious disease?", "o": ["Chicken pox", "AIDS", "Plague", "Corona"], "a": "AIDS"}, {"id": 28, "q": "Which one is counted as a big risk factor for city areas?", "o": ["Water scarcity", "Unplanned development pattern", "Waste management", "None of these"], "a": "Unplanned development pattern"}, {"id": 29, "q": "Which is the most contagious waste?", "o": ["Solid waste", "Municipal Waste", "Bio-medical waste", "E-waste"], "a": "Bio-medical waste"}, {"id": 30, "q": "Which river is known as \"sorrow of Bihar\"?", "o": ["Brahmaputra", "Ganges", "Kosi", "Son"], "a": "Kosi"}, {"id": 31, "q": "Which is/are the methods of waste management?", "o": ["Landfill", "Incineration", "Composting", "All of these"], "a": "All of these"}, {"id": 32, "q": "Construction of Checkdams can prevent from the hazard of.............", "o": ["Landslide", "Drought", "Flood", "Earthquake"], "a": "Flood"}, {"id": 33, "q": "Kyoto protocol was organized in..........", "o": ["1985", "2000", "1997", "2005"], "a": "1997"}, {"id": 34, "q": "Global warming is the resultant of...", "o": ["Soil pollution", "Water pollution", "Green house gas emission", "Noise pollution"], "a": "Green house gas emission"}, {"id": 35, "q": "India receives an annual rainfall around..", "o": ["1100 mm", "1200 mm", "1300 mm", "1400 mm"], "a": "1200 mm"}, {"id": 36, "q": "In which year the devastating Tsunami came in Indian coastal areas?", "o": ["2004", "2001", "1999", "1998"], "a": "2004"}, {"id": 37, "q": "Which one is a contagious disease?", "o": ["AIDS", "Nausea", "Chicken pox", "Dengue"], "a": "Chicken pox"}, {"id": 38, "q": "Kyoto protocol was organized for the reduction of....................", "o": ["Water pollution", "Noise pollution", "Green house gases", "Soil pollution"], "a": "Green house gases"}, {"id": 39, "q": "Sendai framework was organized for the management of...", "o": ["Global warming", "Green house gases", "Disasters", "Industrial pollution"], "a": "Disasters"}, {"id": 40, "q": "In which year, a National Policy on Disaster Management was issued for India?", "o": ["2005", "2006", "2007", "2009"], "a": "2009"}, {"id": 41, "q": "HIV is also known as............", "o": ["High Immune Virus", "Human Interior Virus", "Human Immune Virus", "Highrisk Immune Virus"], "a": "Human Immune Virus"}, {"id": 42, "q": "Punjab and Haryana states have river water dispute on the rivers-", "o": ["Ravi- Beas water", "Ganga water", "Satluj water", "Yamuna water"], "a": "Ravi- Beas water"}, {"id": 43, "q": "What is the branch of science which deals with the formation and distribution of soil?", "o": ["Ecology", "Biology", "Pedology", "Seismology"], "a": "Pedology"}, {"id": 44, "q": "Luminous pollution is also known as-", "o": ["Photo pollution", "Air pollution", "Water pollution", "Soil pollution"], "a": "Photo pollution"}, {"id": 45, "q": "Which is the best method for the management of biomedical wastes?", "o": ["Composting", "Incineration", "Sanitary land filling", "Open dumping"], "a": "Incineration"}, {"id": 46, "q": "In 1986, a very important Act was passed by Indian Parliament for the protection of Environment namely........", "o": ["The Wild Life (Protection) Act", "The Environment (Protection) Act", "The Air (Prevention and Control of Pollution) Act", "The Water (Prevention and Control of Pollution) Act"], "a": "The Environment (Protection) Act"}, {"id": 47, "q": "..................is related with Chipko Movement.", "o": ["Chandi prasad Bhat", "G.D.Agrwal", "Arundhati Roy", "M.C.Mehta"], "a": "Chandi prasad Bhat"}, {"id": 48, "q": "IUCN stands for...", "o": ["International Union for Conservation of Nature", "Indian Union for Conservation of Nature", "International Union for Conservation of Natural Resources", "None of the above"], "a": "International Union for Conservation of Nature"}, {"id": 49, "q": "Noise pollution mesurement can be done in.....", "o": ["Watt", "Frequency", "Decibel", "All of these"], "a": "Decibel"}, {"id": 50, "q": "World Ozone Day is celebrated on.....", "o": ["2016-07-01 00:00:00", "2016-08-01 00:00:00", "2016-09-01 00:00:00", "Ocober 16"], "a": "2016-09-01 00:00:00"}, {"id": 51, "q": "Soil salinity is the resultant of.", "o": ["Overgrazing", "Climate change", "Global warming", "Over irrigation"], "a": "Over irrigation"}, {"id": 52, "q": "Depletion of Ozone hole layer is mainly due to release of......", "o": ["CFC", "CO", "O2", "CO2"], "a": "CFC"}, {"id": 53, "q": "Oceanic acidification occurs due to the dissolution of............", "o": ["Oxygen", "Carbon dioxide", "Methane", "Nitrogen"], "a": "Carbon dioxide"}, {"id": 54, "q": "Sea level rise is the resultant of...", "o": ["Global warming", "Oceanic acidification", "Ozone depletion", "All of these"], "a": "Global warming"}, {"id": 55, "q": "Ozone is a ..pollutant in troposphere.", "o": ["Primary", "Secondary", "Tertiary", "None of these"], "a": "Secondary"}, {"id": 56, "q": "Widely accepted concept of ecological succession is given by..............", "o": ["Odum", "Darwin", "Lamarck", "Clement"], "a": "Clement"}, {"id": 57, "q": "Chipko movement was originated from.......", "o": ["Uttarakhand", "Himachal Pradesh", "Bihar", "Delhi"], "a": "Uttarakhand"}, {"id": 58, "q": "Biome is an example of.....", "o": ["Tiny ecosystem", "Ecology", "Environment", "Vast ecosystem"], "a": "Vast ecosystem"}, {"id": 59, "q": "Open dumping of solid wastes in environment may pose......", "o": ["No health hazards", "Only animal health hazards", "Human health hazards", "Both human and animal health problems"], "a": "Both human and animal health problems"}, {"id": 60, "q": "Electrostatic precipitators are used to control......", "o": ["Water pollution", "Soil pollution", "Air pollution", "Noise pollution"], "a": "Air pollution"}, {"id": 61, "q": "Which Indian Act was introduced in the year of 1981 to reduce the pollution?", "o": ["Water Pollution Act", "Noise Pollution Act", "Air Pollution Act", "None of these"], "a": "Air Pollution Act"}, {"id": 62, "q": "Montreal Protocol is an international treaty organised for what?", "o": ["Protection of ozone layer", "Protection from global warming", "Reducing green house gases", "Reducing air pollution"], "a": "Protection of ozone layer"}, {"id": 63, "q": "Clean Development Mechanism (CDM) and Certified emission reductions (CERs) are related with.....", "o": ["Montreal Protocol", "Basel convention", "Kyoto protocol", "Ramsar Convention"], "a": "Kyoto protocol"}, {"id": 64, "q": "Fukushima incident is related with....", "o": ["Volcanic eruptions", "Nuclear accident", "Earthquake", "Atomic bomb testing"], "a": "Nuclear accident"}, {"id": 65, "q": "Which of the following is a renewable source of energy?", "o": ["Ocean currents", "Solar energy", "Biomass", "All of these"], "a": "All of these"}, {"id": 66, "q": "Which of the following is biodegradable waste?", "o": ["Paper", "Food waste", "Polythene bags", "Synthetic fiber"], "a": "Food waste"}, {"id": 67, "q": "Which of the following air pollution control device has maximum efficiency?", "o": ["Spray tower", "Wet cyclonic scrubber", "Electrostatic precipitator", "Dynamic precipitator"], "a": "Electrostatic precipitator"}, {"id": 68, "q": "Which of the following is not a part of photochemical smog?", "o": ["SPM", "PAN", "O3", "NO2"], "a": "SPM"}, {"id": 69, "q": "Which of the following greenhouse gas is contributed by cattle farming?", "o": ["Carbon monoxide", "Nitrous oxide", "Methane", "All of these"], "a": "Methane"}, {"id": 70, "q": "Which place in India receives the highest annual rainfall?", "o": ["Mawsynram", "Cherrapunji", "Siju", "Phyllut"], "a": "Mawsynram"}, {"id": 71, "q": "Which of the following gases is responsible for the yellowing of the Taj Mahal?", "o": ["Organic carbon", "Black carbon", "Brown carbon", "All of these"], "a": "All of these"}, {"id": 72, "q": "Which one is considered as the largest source energy across the world?", "o": ["Solar", "Oil", "Geothermal", "None of these"], "a": "Oil"}, {"id": 73, "q": "Biodiversity hotspot concept was given first time in year........", "o": ["1978", "1988", "1998", "2008"], "a": "1988"}, {"id": 74, "q": "Concept of sustainable development goals are developed by........", "o": ["UNO", "FAO", "ILO", "WHO"], "a": "UNO"}, {"id": 75, "q": "Deforestation causes......", "o": ["Drought", "Accidents", "Earthquake", "Eclipse"], "a": "Drought"}, {"id": 76, "q": "Which one is the main culprit of global warming?", "o": ["CO", "O2", "CO2", "SO2"], "a": "CO2"}, {"id": 77, "q": "How many sustainable development goals are set by United Nations?", "o": ["17", "25", "21", "29"], "a": "17"}, {"id": 78, "q": "Green plants have.... pigment which helps in photosynthesis.", "o": ["Licopene", "Chlorophyll", "Cytosine", "All of these"], "a": "Chlorophyll"}, {"id": 79, "q": "Decomposers are in....... nature.", "o": ["Saprophytic", "Eutrophic", "Oligotrophic", "None of these"], "a": "Saprophytic"}, {"id": 80, "q": "Which of the following is not a biotic component?", "o": ["Rhizobium", "Protozoa", "Fungi", "Salinity"], "a": "Salinity"}, {"id": 81, "q": "The sequential food habit of the organisms is known as.............", "o": ["Food web", "Food chain", "Ecological niche", "All of these"], "a": "Food chain"}, {"id": 82, "q": "The full form of BOD is....", "o": ["Biochemical Oxygen Demand", "Biochemical Orbit Diversion", "Biomedical Oxygen Demand", "All of these"], "a": "Biochemical Oxygen Demand"}, {"id": 83, "q": "Ecosystem word is given by which scientist?", "o": ["Kofi Annan", "A.G.Tansley", "Al Gore", "Wangari Maathai"], "a": "A.G.Tansley"}, {"id": 84, "q": "The scientist who is regarded as father of ecology.", "o": ["Elton", "Clements", "Odum", "Tansley"], "a": "Odum"}, {"id": 85, "q": "Ozone layer is present in which part of the atmosphere?", "o": ["Troposphere", "Ionosphere", "Stratosphere", "Mesosphere"], "a": "Stratosphere"}, {"id": 86, "q": "The living organisms which can prepare their own food are known as.............", "o": ["Heterotrophs", "Decomposers", "Producers", "Consumers"], "a": "Producers"}, {"id": 87, "q": ".....are the indicators of pollution free zone.", "o": ["Fungus", "Bacteria", "Protozoa", "Lichens"], "a": "Lichens"}, {"id": 88, "q": "The atmospheric layer which is present in the contact of earth...", "o": ["Troposphere", "Stratosphere", "Mesosphere", "Ionosphere"], "a": "Troposphere"}, {"id": 89, "q": "Reciprocal interrelationship in between organisms and their environment is..", "o": ["Ethology", "Environment", "Ecosystem", "Ecology"], "a": "Ecology"}, {"id": 90, "q": "Most of the environmental problems could be solved through.......................", "o": ["Establishing more industries", "Deforestation", "Afforestation", "None of these"], "a": "Afforestation"}, {"id": 91, "q": "The most dangerous pollution is...", "o": ["Air pollution", "Nuclear pollution", "Soil pollution", "Water pollution"], "a": "Nuclear pollution"}, {"id": 92, "q": "The thickness of ozone layer is measured in..........", "o": ["Hertz", "Dobson units", "Kilometers", "Nanometre"], "a": "Dobson units"}, {"id": 93, "q": "Ozone depletion is highest in the region of....", "o": ["South pole", "Equator", "Tropics", "North pole"], "a": "South pole"}, {"id": 94, "q": "Nudation is a part which process?", "o": ["Ecological niche", "Endemic", "Ecological succession", "Ecotype"], "a": "Ecological succession"}, {"id": 95, "q": "The ecological succession that starts in an area of adequate moisture is called as.....", "o": ["Psammosere", "Hydrarch", "Xerarch", "Mesarch"], "a": "Hydrarch"}, {"id": 96, "q": "What does the phrase \"anthropogenic CO2 emissions\" mean?", "o": ["Natural CO2 emissions", "Human made CO2 emissions", "Industrial CO2 emissions", "All of these"], "a": "Human made CO2 emissions"}, {"id": 97, "q": "Which of the following is NOT a primary pollutant?", "o": ["Oxygen", "Ground-level ozone", "Carbon monoxide", "Carbon dioxide"], "a": "Oxygen"}, {"id": 98, "q": "Which of the following gases are main contributors to acid rain?", "o": ["Carbon dioxide and carbon monoxide", "Sulphur dioxide and carbon dioxide", "Sulphur dioxide and nitrogen dioxide", "Sulphur dioxide and nitrous oxide"], "a": "Sulphur dioxide and nitrogen dioxide"}, {"id": 99, "q": "Alive part of the environment is also called as...", "o": ["Abiotic", "Biotic", "Non-biotic", "All of these"], "a": "Biotic"}, {"id": 100, "q": "Ecology word has been coined by....", "o": ["Odum", "Darwin", "Hackel", "Clement"], "a": "Hackel"}, {"id": 101, "q": "Ecology word has been derived from 2 greek words Oikos and Logos. What does mean by oikos?", "o": ["Habitat", "Population", "Community", "None of these"], "a": "Habitat"}, {"id": 102, "q": "What is the full form of DO?", "o": ["Dissolved Ozone", "Dissolved Oxygen", "Dissolved Oil", "None of these"], "a": "Dissolved Oxygen"}, {"id": 103, "q": "Which one is the example of photo-autotroph?", "o": ["Plants", "Bacteria", "Green plants", "All of these"], "a": "Green plants"}, {"id": 104, "q": "The direction of flow of energy in an ecosystem is", "o": ["Unidirectional", "Multidirectional", "Directionless", "All of these"], "a": "Unidirectional"}, {"id": 105, "q": "Nepenthes is an example of..", "o": ["Bacteria", "Fungi", "Algae", "Insectivorous plant"], "a": "Insectivorous plant"}, {"id": 106, "q": "Lotic water ecosystem is realted to.......", "o": ["Running water ecosystem", "Stagnant water ecosystem", "Lake", "Pond"], "a": "Running water ecosystem"}, {"id": 107, "q": "Aquarium is an example of.....", "o": ["Terrestrial ecosystem", "Artificial ecosystem", "Natural ecosystem", "All of these"], "a": "Artificial ecosystem"}, {"id": 108, "q": "Father of Indian ecology is............", "o": ["R. Mishra", "K.R.Puri", "K.D.Sharma", "G.S.Verma"], "a": "R. Mishra"}, {"id": 109, "q": "IPCC is related with the reporting of.....", "o": ["Climate change", "Disasters", "Floods", "None of these"], "a": "Climate change"}, {"id": 110, "q": "At which state region, India is mostly affected with arsenic contamination?", "o": ["Bihar", "West Bengal", "Jharkhand", "Uttar Pradesh"], "a": "West Bengal"}, {"id": 111, "q": "...is an example of gaseous cycle.", "o": ["Hydrological cycle", "Sulfur cycle", "Phosphorous cycle", "All of these"], "a": "Hydrological cycle"}, {"id": 112, "q": "Biosphere is made up of..............", "o": ["Atmosphere", "Hydrosphere", "Lithosphere", "All of these"], "a": "All of these"}, {"id": 113, "q": "Kaziranga national park is very famous for the species of..............", "o": ["Rhinoceros", "Asiatic lion", "Tiger", "Elephant"], "a": "Rhinoceros"}, {"id": 114, "q": "DDT is a common.........", "o": ["Pesticide", "Halon", "Coolant", "None of these"], "a": "Pesticide"}, {"id": 115, "q": "...is the cleanest fossil fuel.", "o": ["Coal", "Petrol", "Natural gas", "Diesel"], "a": "Natural gas"}, {"id": 116, "q": "Dudhwa National park is located in which state?", "o": ["Haryana", "Uttar Pradesh", "Himachal Pradesh", "Madhya Pradesh"], "a": "Uttar Pradesh"}, {"id": 117, "q": "IUCN compiles.", "o": ["Blue data book", "Red data book", "Green data book", "All of these"], "a": "Red data book"}, {"id": 118, "q": "Solar energy is an example of.", "o": ["Conventional source of energy", "Non-conventional source of energy", "Traditional source of energy", "None of these"], "a": "Non-conventional source of energy"}, {"id": 119, "q": "Which one does not cause any threat to the biodiversity?", "o": ["Biological invasion", "Habitat destruction", "Declaring wild life sanctuaries", "Poaching"], "a": "Declaring wild life sanctuaries"}, {"id": 120, "q": "species that have very restricted distribution and are found in some particular regions.", "o": ["Endemic species", "Genetic species", "Plant species", "Animal Species"], "a": "Endemic species"}, {"id": 121, "q": "Jim Corbett National Park is located in....", "o": ["Uttar Pradesh", "Himachal Pradesh", "Uttarakhand", "Sikkim"], "a": "Uttarakhand"}, {"id": 122, "q": "What is JFM?", "o": ["Joint Forest Management", "Joint Facility Management", "Joint Forecast Management", "Joint Fire Management"], "a": "Joint Forest Management"}, {"id": 123, "q": "Sundarbans National Park is located in...........", "o": ["West Bengal", "Meghalaya", "Sikkim", "Odisha"], "a": "West Bengal"}, {"id": 124, "q": "The total number of Biogeographic zones in India is....", "o": ["2", "6", "8", "10"], "a": "10"}, {"id": 125, "q": "In which year project Elephant was launched in India?", "o": ["1973", "1986", "1992", "1998"], "a": "1992"}, {"id": 126, "q": "Which types of coal is having the best quality?", "o": ["Peat", "Lignite", "Bituminous", "Anthracite"], "a": "Anthracite"}, {"id": 127, "q": "Which types of coal is significantly found in India?", "o": ["Peat", "Lignite", "Bituminous", "Anthracite"], "a": "Bituminous"}, {"id": 128, "q": "Which types of coal is having the highets calorific value?", "o": ["Peat", "Lignite", "Bituminous", "Anthracite"], "a": "Anthracite"}, {"id": 129, "q": "Economic importance of water may include.......", "o": ["Industrial uses", "Ecosystem services", "Recreational uses", "All of these"], "a": "All of these"}, {"id": 130, "q": "Nile river water dispute is in between...", "o": ["Egypt, Ethiopia, and Sudan", "Syria and Russia", "Ethiopia and China", "None of these"], "a": "Egypt, Ethiopia, and Sudan"}, {"id": 131, "q": "Soil is a...", "o": ["Renewable natural resource", "Non-renewable natural resource", "Anthropogenic resource", "None of these"], "a": "Renewable natural resource"}, {"id": 132, "q": "Gully soil erosion is due to the formation of..........", "o": ["Single rill", "Network of rills", "Sheet erosion", "Grazing"], "a": "Network of rills"}, {"id": 133, "q": "Humus is ..content present in fertile soil.", "o": ["Inorganic", "Sand", "Organic", "Pebbles"], "a": "Organic"}, {"id": 134, "q": "Roots of leguminous plants contain..........bacteria.", "o": ["Bascillus", "Rhizobium", "Pseudomonas", "All of these"], "a": "Rhizobium"}, {"id": 135, "q": "Permanent loss of biological productivity of soil is known as....", "o": ["Mulching", "Flood", "Soil erosion", "Desertification"], "a": "Desertification"}, {"id": 136, "q": "Temporary loss of soil fertility is known as..........", "o": ["Soil erosion", "Land use change", "Desertification", "Soil acidification"], "a": "Soil erosion"}, {"id": 137, "q": "Differences between the genetic characteristics within the individuals of same species is known as.......", "o": ["Species biodiversity", "Genetic biodiversity", "Ecosystem biodiversity", "All of these"], "a": "Genetic biodiversity"}, {"id": 138, "q": "How many biodiversity hotspots are present in India?", "o": ["4", "3", "2", "1"], "a": "4"}, {"id": 139, "q": "Which one is not considered as Indian biodiversity hotspot?", "o": ["Sundaland", "Aravalli hills", "Indo-burma", "Western Ghat"], "a": "Aravalli hills"}, {"id": 140, "q": "Which factor is not responsible for biodiversity loss?", "o": ["Habitat destruction", "Poaching", "Sacred grooves", "Climate change"], "a": "Sacred grooves"}, {"id": 141, "q": "Nanda devi national park is located at…..................", "o": ["Uttar Pradesh", "Himachal Pradesh", "Haryana", "Uttarakhand"], "a": "Uttarakhand"}, {"id": 142, "q": "How many biosphere reserves are present in India?", "o": ["18", "28", "36", "46"], "a": "18"}, {"id": 143, "q": "Sundarban National Park is very famous for the presence of ………………….", "o": ["Sacred groves", "Mangroves", "Coral reef", "All of these"], "a": "Mangroves"}, {"id": 144, "q": "Biodiversity is found at …......................levels.", "o": ["4", "3", "2", "1"], "a": "3"}];
+
+        // IKS Question Bank (155 Questions) — sourced from IKS_Practice_Questions_Bank_Checked.xlsx
+        const iksQuestionBank = [{"id": 1001, "q": "India has been a land of great cultures since ancient times including…....", "o": ["Hinduism", "Jainism", "Buddhism", "All of these"], "a": "All of these"}, {"id": 1002, "q": "Bharatiya Knowledge System has been evident from the era of Harappan Civilization which was started from…............................", "o": ["2600-1900 BCE", "3600-900 BCE", "6600-2900 BCE", "5600-3900 BCE"], "a": "2600-1900 BCE"}, {"id": 1003, "q": "Mohenjodaro in Sind province is now located in…............", "o": ["Bhutan", "Sri Lanka", "India", "Pakistan"], "a": "Pakistan"}, {"id": 1004, "q": "What is Pyrotechnology?", "o": ["Crafts created using fire", "Crafts created without use of fire", "Crafts created using water and soil", "None of these"], "a": "Crafts created using fire"}, {"id": 1005, "q": "What is the time period of colonial period in India?", "o": ["From 1500 CE - 1747 CE", "From 1700 CE - 1947 CE", "From 1600 CE - 1847 CE", "None of these"], "a": "From 1700 CE - 1947 CE"}, {"id": 1006, "q": "India has been a land of great cultures since ancient times including…....", "o": ["Hinduism", "Jainism", "Buddhism", "All of these"], "a": "All of these"}, {"id": 1007, "q": "……………………….. is the ultimate goal of human life, representing liberation from the cycle of birth and death.", "o": ["Karma", "Maya", "Atman", "Moksha"], "a": "Moksha"}, {"id": 1008, "q": "Shakuntala is dramatic literature written by…......................", "o": ["Surdasa", "Kalidasa", "Tulsidasa", "Narottamdasa"], "a": "Kalidasa"}, {"id": 1009, "q": "Ajanta and Ellora caves contain some of the finest examples of classical Indian painting, depicting scenes from the life of…………………………...", "o": ["Hinduism", "Buddhism", "Both Hinduism and Buddhism", "Sikkhism"], "a": "Both Hinduism and Buddhism"}, {"id": 1010, "q": "What is the time period of vedic period in India?", "o": ["From 1000 BCE - 500 BCE", "From 1500 BCE - 500 BCE", "From 2000 BCE - 1500 BCE", "All of these"], "a": "From 1500 BCE - 500 BCE"}, {"id": 1011, "q": "The illusionary nature of the world is also known as…........", "o": ["Karma", "Maya", "Atman", "Moksha"], "a": "Maya"}, {"id": 1012, "q": "The entire body of knowledge is divided into ….... sets in Mundakupanishad.", "o": ["0", "1", "2", "3"], "a": "2"}, {"id": 1013, "q": "Aṣṭādhyāyī is a grammer book written by…........", "o": ["Aryabhatta", "Brahmgupta", "Panini", "None of these"], "a": "Panini"}, {"id": 1014, "q": "Sage Gautam is famous for his contribution about the scripture related to…................", "o": ["Vaisheshika", "Samkhya", "Nyaya", "None of these"], "a": "Nyaya"}, {"id": 1015, "q": "Who is known as the father of Vedanta?", "o": ["Gautam", "Kanad", "Jamini", "Veda Vyas"], "a": "Veda Vyas"}, {"id": 1016, "q": "Philosophical study of being, existence, and reality is known as….....................", "o": ["Phenology", "Oncology", "Ontology", "None of these"], "a": "Ontology"}, {"id": 1017, "q": "In traditional knowledge of India, water and fire are known as…………………….and ………………….., respectively.", "o": ["Ap and Tejas", "Vayu and Tejas", "Tejas and Akasha", "All of these"], "a": "Ap and Tejas"}, {"id": 1018, "q": "Mimamsa means….......,", "o": ["Science education", "Art education", "Critical investigation", "Economics education"], "a": "Critical investigation"}, {"id": 1019, "q": "Sage Patanjali has given the concept of….........................,", "o": ["Nyaya", "Yoga", "Vaisheshika", "None of these"], "a": "Yoga"}, {"id": 1020, "q": "Apara Vidhya means…......", "o": ["Sanskrit", "The higher knowledge", "The lower knowledge", "All of these"], "a": "The lower knowledge"}, {"id": 1021, "q": "Which one is famous for foundational principles governing health, disease, diagnosis, and treatment.", "o": ["Vaisheshika", "Āyurveda", "Apara vidhya", "Para vidhaya"], "a": "Āyurveda"}, {"id": 1022, "q": "What was the time period of Gupta script?", "o": ["From 4th to 6th century CE", "From 6th to 8th century CE", "From 8th to 10th century CE", "From 10th to 12th century CE"], "a": "From 4th to 6th century CE"}, {"id": 1023, "q": "Isa is a type of …........", "o": ["Upanishads", "Puranas", "Grammer", "None of these"], "a": "Upanishads"}, {"id": 1024, "q": "How many Parvas are in Mahabharata?", "o": ["18", "28", "38", "48"], "a": "18"}, {"id": 1025, "q": "Which ancient and sacred scriptures are known as the foundation of Hinduism?", "o": ["Vedas", "Bhagvad Gita", "Ramayana", "Mahabhartha"], "a": "Vedas"}, {"id": 1026, "q": "In Hinduism, Yajna (Sacrifice) means", "o": ["Emphasis on purity and precision in the execution of rituals", "Performing rituals and sacrifices toappease the gods and maintain cosmic order", "Contains prose mantras used in rituals", "Detailed explanations of the rituals and their significance"], "a": "Performing rituals and sacrifices toappease the gods and maintain cosmic order"}, {"id": 1027, "q": "What are Agamas and Tantras?", "o": ["Collection of ethical guidelines", "Role of different dities", "Base of various religious and spiritual practices", "None of these"], "a": "Base of various religious and spiritual practices"}, {"id": 1028, "q": "Music is originated from….........,", "o": ["Rk veda", "Yajur Veda", "Sama veda", "Atharva Veda"], "a": "Sama veda"}, {"id": 1029, "q": "The Vedas are the oldest and most authoritative scriptures of Hinduism. They consist of ….... main collections.", "o": ["2", "3", "4", "5"], "a": "4"}, {"id": 1030, "q": "Devanagari Script was developed in…......centuary.", "o": ["9th century CE", "8th century CE", "7th century CE", "6th century CE"], "a": "7th century CE"}, {"id": 1031, "q": "Which one refers to the literature, particularly within the realms of philosophy, spirituality, law, and grammar, using a concise and aphoristic style?", "o": ["Karma", "Darshana", "Tantras", "Sutras"], "a": "Sutras"}, {"id": 1032, "q": "In which ancient scripture, social customs, ethics of human behaviour have been mentioned?", "o": ["Smritis", "Sutras", "Puranas", "Gita"], "a": "Smritis"}, {"id": 1033, "q": "Tripitaka scripture is related to…..........,", "o": ["Hinduism", "Jainism", "Buddhism", "Sikkhism"], "a": "Buddhism"}, {"id": 1034, "q": "Which one comprises translations of the Buddha's teachings into Tibetan?", "o": ["Kangyur", "Smritis", "Sutras", "None of these"], "a": "Kangyur"}, {"id": 1035, "q": "Which one is the oldest veda?", "o": ["Rk veda", "Yajur Veda", "Sama veda", "Atharva Veda"], "a": "Rk veda"}, {"id": 1036, "q": "Which one is the sacred scriptures of the Jainism.", "o": ["Upanishadas", "Agamas", "Puranas", "Mahayana"], "a": "Agamas"}, {"id": 1037, "q": "During ancient Indian education system, education was provided in residential schools, which is known as…………………….", "o": ["Akhadas", "Sarayas", "Gurukulas", "Mathas"], "a": "Gurukulas"}, {"id": 1038, "q": "Breathing exercises are also known as…...............", "o": ["Pranayama", "Asanas", "Chintan", "Manan"], "a": "Pranayama"}, {"id": 1039, "q": "Which place was famous for the pursuing meditation, contemplation, and philosophical inquiry under the guidance of a spiritual teacher (guru)?", "o": ["Mathas", "Gurukulas", "Viharas", "Ashramas"], "a": "Ashramas"}, {"id": 1040, "q": "Mahayana Sutras are the …..............scriptures.", "o": ["Hindu", "Jain", "Sikkh", "Buddhist"], "a": "Buddhist"}, {"id": 1041, "q": "Which one is known as 5th veda in Hinduism?", "o": ["Vedas", "Mahabhartha", "Ramayana", "Bhagvad Gita"], "a": "Mahabhartha"}, {"id": 1042, "q": "Charaka and Kautilya were the alumni of ……………………", "o": ["Takshashila", "Nalanda", "Vikramshila", "Vallabhi"], "a": "Takshashila"}, {"id": 1043, "q": "The golden period of Nalanda University was in between……………………………", "o": ["5th century CE and 12th century CE", "7th century CE and 11th century CE", "8th century CE and 15th century CE", "9th century CE and 10th century CE"], "a": "5th century CE and 12th century CE"}, {"id": 1044, "q": "Vallabhi was a great center of learning which is located in the state of….................,", "o": ["Bihar", "Gujarat", "Madhya Pradesh", "Punjab"], "a": "Gujarat"}, {"id": 1045, "q": "Ether is among….................,", "o": ["Five elements", "Siksha", "Darshana", "None of these"], "a": "Five elements"}, {"id": 1046, "q": "Total how many Nakshatras are mentioned in the ancient literatures?", "o": ["8", "18", "23", "28"], "a": "28"}, {"id": 1047, "q": "Vedanga-Jyotisha was composed in….......,", "o": ["1000 BCE", "1100 BCE", "1200 BCE", "1300 BCE"], "a": "1200 BCE"}, {"id": 1048, "q": "Yajnopavita is realted to…......................,", "o": ["Upnayana", "Grihstha", "Vanprastha", "None of these"], "a": "Upnayana"}, {"id": 1049, "q": "Arthashastra was written by…..........,", "o": ["Aryabhatta", "Kautilya", "Panini", "Brahmgupta"], "a": "Kautilya"}, {"id": 1050, "q": "In which state, ancient Vikramshila University was located?", "o": ["Uttar Pradesh", "Gujarat", "Madhya Pradesh", "Bihar"], "a": "Bihar"}, {"id": 1051, "q": "What was the period of Aryabhata?", "o": ["376–440 CE", "476–550 CE", "526–560 CE", "396–510 CE"], "a": "476–550 CE"}, {"id": 1052, "q": "Siddhanta Shiromani is written by…........,", "o": ["Brahgupta", "Aryabhatta", "Bhaskara", "Kautilya"], "a": "Bhaskara"}, {"id": 1053, "q": "Who gave Heliocentric model of thesolar system?", "o": ["Aryabhatta", "Brahgupta", "Bhaskara", "Kautilya"], "a": "Aryabhatta"}, {"id": 1054, "q": "The Indian calendar often integrates….....,", "o": ["Only stars", "Only Lunar element", "Only Solar element", "Both lunar and solar elements"], "a": "Both lunar and solar elements"}, {"id": 1055, "q": "How many ritus are there as The Indian calendar?", "o": ["4", "6", "8", "10"], "a": "6"}, {"id": 1056, "q": "Which ancient Indian text describes mining and metallurgical techniques?", "o": ["Rigveda", "Arthashastra", "Charaka Samhita", "Natya Shastra"], "a": "Arthashastra"}, {"id": 1057, "q": "What was the primary fuel used for smelting metals in ancient India?", "o": ["Coal", "Charcoal", "Cow dung", "Wood"], "a": "Charcoal"}, {"id": 1058, "q": "Which metal was extensively used in ancient India for making idols using the lost-wax technique?", "o": ["Bronze", "Iron", "Zinc", "Copper"], "a": "Bronze"}, {"id": 1059, "q": "What was the primary purpose of 'Kupya' in ancient Indian metallurgy?", "o": ["A type of furnace", "A crucible for melting metals", "A bellow for air supply", "A hammer for forging"], "a": "A crucible for melting metals"}, {"id": 1060, "q": "Which of the following was NOT an alloy developed in ancient India?", "o": ["Brass", "Bronze", "Stainless steel", "Pewter"], "a": "Stainless steel"}, {"id": 1061, "q": "The famous Iron Pillar of Delhi is made up of which material?", "o": ["Wrought Iron", "Cast Iron", "High-carbon steel", "Pure Iron"], "a": "Wrought Iron"}, {"id": 1062, "q": "Which ancient Indian metallurgist is known for advancements in iron smelting?", "o": ["Nagarjuna", "Sushruta", "Varahamihira", "Patanjali"], "a": "Nagarjuna"}, {"id": 1063, "q": "Which of the following is a unique contribution of Indian Mathematics?", "o": ["Calculus", "Complex Numbers", "Pythagorean Theorem", "Decimal System with Zero"], "a": "Decimal System with Zero"}, {"id": 1064, "q": "Which Indian mathematician introduced the concept of negative numbers?", "o": ["Bhaskara II", "Brahmagupta", "Aryabhata", "Varahamihira"], "a": "Brahmagupta"}, {"id": 1065, "q": "The 'Pingala's Chandaḥ Śāstra' is associated with which mathematical concept?", "o": ["Magic Squares", "Binary Numbers", "Trigonometry", "Algebra"], "a": "Binary Numbers"}, {"id": 1066, "q": "What is the unique feature of Indian trigonometry compared to Greek trigonometry?", "o": ["Use of Sine (Jya) function", "Use of Angles", "Use of Tangents", "Use of Radians"], "a": "Use of Sine (Jya) function"}, {"id": 1067, "q": "Which ancient Indian text contains the earliest known discussion of permutations and combinations?", "o": ["Lilavati", "Yuktibhāṣā", "Chandah Sāstra", "Siddhanta Shiromani"], "a": "Chandah Sāstra"}, {"id": 1068, "q": "Which ancient Indian text is considered the most authoritative work on military strategy and statecraft?", "o": ["Manusmriti", "Mahabharata", "Rigveda", "Arthashastra"], "a": "Arthashastra"}, {"id": 1069, "q": "Who is regarded as the ancient Indian scholar who systematized military science and warfare strategies?", "o": ["Chanakya", "Aryabhata", "Patanjali", "Panini"], "a": "Chanakya"}, {"id": 1070, "q": "What was the primary focus of military training in ancient India as described in the Arthashastra?", "o": ["Physical strength only", "Archery and Swordsmanship", "Espionage and psychological warfare", "Combined training in weapons, strategy, and discipline"], "a": "Combined training in weapons, strategy, and discipline"}, {"id": 1071, "q": "Which ancient Indian kingdom was particularly known for its advanced military formations like the 'Chakravyuha'?", "o": ["Maurya Empire", "Gupta Empire", "Magadha", "Mahajanapadas"], "a": "Mahajanapadas"}, {"id": 1072, "q": "What was the primary purpose of Niyuddha Kala in ancient India?", "o": ["Entertainment", "Military combat and self-defense", "Religious rituals", "Agricultural training"], "a": "Military combat and self-defense"}, {"id": 1073, "q": "Which ancient Indian text describes Niyuddha techniques and combat strategies?", "o": ["Arthashastra", "Natya Shastra", "Manusmriti", "Agni Purana"], "a": "Agni Purana"}, {"id": 1074, "q": "Which warrior-sage is traditionally associated with the origin of Niyuddha in Indian culture?", "o": ["Dronacharya", "Parshuram", "Bhishma", "Karna"], "a": "Parshuram"}, {"id": 1075, "q": "Which of the following was a key principle of Niyuddha Kala?", "o": ["Use of only long-range weapons", "Strict non-violence", "Discipline, ethics, and physical prowess", "Focus on magical powers"], "a": "Discipline, ethics, and physical prowess"}, {"id": 1076, "q": "Which Vedic concept represents the deification and sacredness of nature?", "o": ["Yajna", "Pradushana", "Devata", "Prakriti"], "a": "Prakriti"}, {"id": 1077, "q": "In Vedic tradition, what does the term 'Prithvi' signify?", "o": ["Goddess of Water", "Mother Earth", "God of Fire", "Divine Air"], "a": "Mother Earth"}, {"id": 1078, "q": "Which Vedic practice reflects environmental conservation through ritual offerings?", "o": ["Tapasya", "Yajna", "Dhyana", "Puja"], "a": "Yajna"}, {"id": 1079, "q": "Which Vedic text emphasizes the interconnectedness of all natural elements?", "o": ["Rigveda", "Atharvaveda", "Samaveda", "Yajurveda"], "a": "Atharvaveda"}, {"id": 1080, "q": "The \"Paradigm Shift\" through IKS emphasizes:", "o": ["Blending ancient wisdom with modern scientific methods", "Rejecting technological advancements", "Exclusively using Sanskrit terminology", "Reviving outdated practices without modification"], "a": "Blending ancient wisdom with modern scientific methods"}, {"id": 1081, "q": "According to Bhartṛhari, what is the indivisible unit of linguistic communication?", "o": ["Word", "Phoneme", "Sentence", "Meaning"], "a": "Sentence"}, {"id": 1082, "q": "The \"Vigyan Jyoti\" program encourages girls to pursue STEM fields by:", "o": ["Teaching Vedic mathematics exclusively", "Combining traditional Indian sciences with modern STEM", "Focusing only on space technology", "Ignoring IKS completely"], "a": "Combining traditional Indian sciences with modern STEM"}, {"id": 1083, "q": "Bhartṛhari's view that language and reality are inseparable aligns with which concept?", "o": ["Śabda-pramana", "Yajna", "Pradushana", "Karma"], "a": "Śabda-pramana"}, {"id": 1084, "q": "Which of the following is a key strategy to integrate IKS into modern education?", "o": ["Incorporate traditional texts in STEM curricula", "Replace Western science entirely", "Limit IKS to history courses", "Ignore contemporary applications"], "a": "Incorporate traditional texts in STEM curricula"}, {"id": 1085, "q": "In Panini's Aṣṭādhyāyī, what is the primary mechanism for generating grammatical rules?", "o": ["Random word lists", "Sutras with recursive operations", "Pictorial representations", "Oral traditions only"], "a": "Sutras with recursive operations"}, {"id": 1086, "q": "Which of the following is a focus area of the IKS Division established under the Ministry of Education?", "o": ["Preserving ancient manuscripts only", "Promoting only Ayurveda in schools", "Integrating IKS into mainstream education and research", "Translating all texts into English"], "a": "Integrating IKS into mainstream education and research"}, {"id": 1087, "q": "How does IKS contribute to environmental sustainability today?", "o": ["Adapting ancient water management to modern ecology", "By reviving outdated farming tools", "Banning all industrial development", "Using only organic pesticides"], "a": "Adapting ancient water management to modern ecology"}, {"id": 1088, "q": "What makes Sanskrit uniquely suited for Natural Language Processing (NLP)?", "o": ["Its ancient religious status", "Simple vocabulary", "Large number of speakers today", "Highly structured, rule-based grammar"], "a": "Highly structured, rule-based grammar"}, {"id": 1089, "q": "What is the primary purpose of Chandas (prosody) in ancient Indian literature?", "o": ["Decorative wordplay", "Structural framework for poetic composition", "Religious rituals only", "Musical notation"], "a": "Structural framework for poetic composition"}, {"id": 1090, "q": "Which Vedic text is the earliest known source for the study of Chandas?", "o": ["Rigveda", "Yajurveda", "Chandogya Upanishad", "Natya Shastra"], "a": "Rigveda"}, {"id": 1091, "q": "In prosody, a Guru (heavy syllable) is defined by:", "o": ["Sacred meaning", "High pitch", "Length", "Position in the stanza"], "a": "Length"}, {"id": 1092, "q": "What was the primary function of Gana (mnemonic syllables) in Sanskrit prosody?", "o": ["To memorize Vedic hymns", "To classify poetic metres", "To teach grammar rules", "To compose musical notes"], "a": "To classify poetic metres"}, {"id": 1093, "q": "Which of these is NOT one of the \"seven birds\" (major Sanskrit metres)?", "o": ["Anuṣṭubh", "Triṣṭubh", "Jagatī", "Kavya"], "a": "Kavya"}, {"id": 1094, "q": "How did metres contribute to literary architecture in ancient India?", "o": ["By standardizing emotional expression", "By providing rigid rhythmic frameworks for poetry", "By replacing grammatical rules", "Limiting creative freedom"], "a": "By providing rigid rhythmic frameworks for poetry"}, {"id": 1095, "q": "According to the Vedic model, how many levels (koshas) of consciousness are described?", "o": ["3", "6", "5", "12"], "a": "5"}, {"id": 1096, "q": "The ancient Indian theory of speech (Vak) and cognition is primarily explored in which text?", "o": ["Patanjali's Yoga Sutras", "Charaka Samhita", "Nyaya Sutras", "Mandukya Upanishad"], "a": "Mandukya Upanishad"}, {"id": 1097, "q": "Which governmental initiative promotes IKS in current research and policy?", "o": ["AYUSH Mission", "Digital India", "Make in India", "Make in India"], "a": "AYUSH Mission"}, {"id": 1098, "q": "Which ancient Indian text explicitly mentions Anvīkṣikī as one of the four vital vidyās for statecraft?", "o": ["Manusmriti", "Arthashastra", "Rigveda", "Natya Shastra"], "a": "Arthashastra"}, {"id": 1099, "q": "The term Anvīkṣikī primarily refers to:", "o": ["Military strategy", "Agricultural techniques", "Poetic composition", "Logical and philosophical reasoning"], "a": "Logical and philosophical reasoning"}, {"id": 1100, "q": "Rajadharma in ancient Indian polity primarily emphasized:", "o": ["Military conquests", "Duties and ethical responsibilities of a ruler", "Trade regulations", "Religious rituals"], "a": "Duties and ethical responsibilities of a ruler"}, {"id": 1101, "q": "Kautilya's Arthashastra is fundamentally a treatise on:", "o": ["Poetic composition", "Astronomical calculations", "Statecraft, economics, and political strategy", "Ayurvedic medicine"], "a": "Statecraft, economics, and political strategy"}, {"id": 1102, "q": "The Shulba Sutras in ancient India primarily dealt with:", "o": ["Land measurement and taxation", "Military strategy", "Temple architecture", "Ayurvedic medicine"], "a": "Temple architecture"}, {"id": 1103, "q": "Which ancient Indian text provides detailed guidelines for revenue collection and taxation under the Mauryan administration?", "o": ["Manusmriti", "Arthashastra", "Rigveda", "Natya Shastra"], "a": "Arthashastra"}, {"id": 1104, "q": "A key mechanism to integrate IKS into modern education is:", "o": ["Incorporating traditional texts in interdisciplinary curricula", "Limiting IKS to history courses", "Promoting only theoretical study", "Ignoring Western sciences"], "a": "Incorporating traditional texts in interdisciplinary curricula"}, {"id": 1105, "q": "The Paradigm Shift expected from IKS integration emphasizes:", "o": ["Isolating IKS from global systems", "Rejecting all contemporary knowledge", "Focusing on Sanskrit literature", "Blending ancient wisdom with modern scientific rigor"], "a": "Blending ancient wisdom with modern scientific rigor"}, {"id": 1106, "q": "What is the primary focus of the Indian Knowledge System (IKS)?", "o": ["Modern scientific theories", "Ancient Indian intellectual traditions and their applications", "Western philosophies", "Contemporary technological advancements"], "a": "Ancient Indian intellectual traditions and their applications"}, {"id": 1107, "q": "Which ancient Indian text is considered the oldest and forms the foundation of the Vedic literature?", "o": ["Bhagavad Gita", "Rigveda", "Upanishads", "Mahabharata"], "a": "Rigveda"}, {"id": 1108, "q": "In ancient Indian mathematics, which numeral system was developed that significantly influenced global mathematics?", "o": ["Roman numeral system", "Binary numeral system", "Decimal place value system", "Hexadecimal system"], "a": "Decimal place value system"}, {"id": 1109, "q": "Who is known as the 'Father of Indian Astronomy' for his seminal work 'Arybhatiya'?", "o": ["Varahamihira", "Brahmagupta", "Aryabhata", "Bhaskara I"], "a": "Aryabhata"}, {"id": 1110, "q": "Which ancient Indian treatise is renowned for its detailed exposition on statecraft, economics, and military strategy?", "o": ["Manusmriti", "Arthashastra", "Ramayana", "Mahabharata"], "a": "Arthashastra"}, {"id": 1111, "q": "In the context of Indian linguistics, what is 'Panini' known for?", "o": ["Developing the concept of zero", "Writing the epic Mahabharata", "Composing a comprehensive grammar of Sanskrit", "Establishing the principles of Ayurveda"], "a": "Composing a comprehensive grammar of Sanskrit"}, {"id": 1112, "q": "Which ancient Indian science focuses on health, wellness, and longevity through natural means?", "o": ["Yoga", "Ayurveda", "Jyotisha", "Vaastu Shastra"], "a": "Ayurveda"}, {"id": 1113, "q": "The 'Sulbasutras' are ancient Indian texts primarily concerned with which subject?", "o": ["Astronomy", "Geometry and construction of altars", "Music and arts", "Medicine"], "a": "Geometry and construction of altars"}, {"id": 1114, "q": "Which ancient Indian scholar is credited with the discovery of the concept of zero as a numeral?", "o": ["Aryabhata", "Brahmagupta", "Bhaskara II", "Varahamihira"], "a": "Brahmagupta"}, {"id": 1115, "q": "In ancient Indian architecture, what is the significance of 'Vaastu Shastra'?", "o": ["It is a treatise on dance and performance arts", "It provides guidelines on the design and layout of buildings and structures", "It is a manual on ancient warfare techniques", "None of these"], "a": "It provides guidelines on the design and layout of buildings and structures"}, {"id": 1116, "q": "Which of the following is a classical Indian dance form that originated in Tamil Nadu?", "o": ["Kathak", "Bharatanatyam", "Odissi", "Kathakali"], "a": "Bharatanatyam"}, {"id": 1117, "q": "The ancient Indian text 'Charaka Samhita' is associated with which field?", "o": ["Astronomy", "Medicine", "Mathematics", "Music"], "a": "Medicine"}, {"id": 1118, "q": "Which ancient Indian university was renowned for its vast library and attracted students from various parts of the world?", "o": ["Takshashila", "Nalanda", "Vikramashila", "Vallabhi"], "a": "Nalanda"}, {"id": 1119, "q": "In the context of Indian philosophy, what does 'Advaita Vedanta' emphasize?", "o": ["Duality between mind and body", "Non-dualism and the unity of the individual soul with the ultimate reality", "The importance of rituals and ceremonies", "The supremacy of devotional practices"], "a": "Non-dualism and the unity of the individual soul with the ultimate reality"}, {"id": 1120, "q": "Who authored the ancient Indian text 'Natya Shastra', which serves as a comprehensive guide on performing arts?", "o": ["Kalidasa", "Bharata Muni", "Tulsidas", "Valmiki"], "a": "Bharata Muni"}, {"id": 1121, "q": "The 'Panchatantra' is a collection of ancient Indian tales primarily intended to impart what?", "o": ["Religious teachings", "Moral and ethical lessons", "Historical accounts", "Scientific knowledge"], "a": "Moral and ethical lessons"}, {"id": 1122, "q": "Which ancient Indian text is considered a foundational work on yoga philosophy?", "o": ["Bhagavad Gita", "Yoga Sutras of Patanjali", "Hatha Yoga Pradipika", "Gheranda Samhita"], "a": "Yoga Sutras of Patanjali"}, {"id": 1123, "q": "In Indian classical music, what are the two primary systems?", "o": ["Carnatic and Hindustani", "Folk and Classical", "Raga and Tala", "Sitar and Tabla"], "a": "Carnatic and Hindustani"}, {"id": 1124, "q": "Which ancient Indian text deals with the principles of love and human relationships?", "o": ["Manusmriti", "Kamasutra", "Arthashastra", "Upanishads"], "a": "Kamasutra"}, {"id": 1125, "q": "The 'Bhagavad Gita' is a part of which larger Indian epic?", "o": ["Ramayana", "Mahabharata", "Vedas", "Puranas"], "a": "Mahabharata"}, {"id": 1126, "q": "Which ancient Indian scholar made significant contributions to the field of metallurgy and is known for his work 'Rasaratnakara'?", "o": ["Aryabhata", "Charaka", "Nagarjuna", "Varahamihira"], "a": "Nagarjuna"}, {"id": 1127, "q": "Which Indian system of knowledge focuses on ethical living, duties, and moral responsibilities?", "o": ["Dharma Shastra", "Arthashastra", "Nyaya Sutra", "Vaastu Shastra"], "a": "Dharma Shastra"}, {"id": 1128, "q": "The ancient Indian science of 'Jyotisha' is primarily concerned with which field?", "o": ["Mathematics", "Astronomy and astrology", "Medicine", "Architecture"], "a": "Astronomy and astrology"}, {"id": 1129, "q": "Which Indian scripture contains detailed discussions on the four goals of life: Dharma, Artha, Kama, and Moksha?", "o": ["Upanishads", "Bhagavad Gita", "Manusmriti", "Puranas"], "a": "Upanishads"}, {"id": 1130, "q": "The 'Brihat Samhita' by Varahamihira is an encyclopedic work covering topics related to which fields?", "o": ["Medicine and surgery", "Astronomy, meteorology, and architecture", "Poetry and drama", "Religion and philosophy"], "a": "Astronomy, meteorology, and architecture"}, {"id": 1131, "q": "Which ancient Indian epic narrates the story of Lord Rama and his quest to rescue Sita?", "o": ["Mahabharata", "Ramayana", "Bhagavad Gita", "Upanishads"], "a": "Ramayana"}, {"id": 1132, "q": "In Ayurveda, what does the term 'Tridosha' refer to?", "o": ["Three types of food", "Three fundamental bodily humors (Vata, Pitta, Kapha)", "Three stages of life", "Three types of diseases"], "a": "Three fundamental bodily humors (Vata, Pitta, Kapha)"}, {"id": 1133, "q": "Which ancient Indian university was known for specializing in Buddhist studies and higher education?", "o": ["Takshashila", "Nalanda", "Vikramashila", "Ujjain"], "a": "Nalanda"}, {"id": 1134, "q": "The 'Ashtadhyayi' by Panini is a seminal work in which field?", "o": ["Medicine", "Grammar and linguistics", "Astronomy", "Ethics"], "a": "Grammar and linguistics"}, {"id": 1135, "q": "Which Indian knowledge tradition emphasizes meditation and self-realization?", "o": ["Vedanta", "Mimamsa", "Nyaya", "Samkhya"], "a": "Vedanta"}, {"id": 1136, "q": "Which branch of Indian philosophy is primarily concerned with logic and reasoning?", "o": ["Nyaya", "Yoga", "Samkhya", "Vedanta"], "a": "Nyaya"}, {"id": 1137, "q": "The concept of 'Panch Mahabhuta' in Indian philosophy refers to which of the following?", "o": ["Five types of meditation", "Five great elements (Earth, Water, Fire, Air, Space)", "Five branches of Ayurveda", "Five Vedic scriptures"], "a": "Five great elements (Earth, Water, Fire, Air, Space)"}, {"id": 1138, "q": "Who among the following is regarded as the pioneer of Indian logic (Nyaya)?", "o": ["Gautama", "Kapila", "Patanjali", "Bhartrihari"], "a": "Gautama"}, {"id": 1139, "q": "Which of the following is NOT a classical Indian musical instrument?", "o": ["Sitar", "Veena", "Tabla", "Guitar"], "a": "Guitar"}, {"id": 1140, "q": "The 'Sushruta Samhita' is an ancient Indian text that deals with which field?", "o": ["Astronomy", "Surgery and medicine", "Architecture", "Philosophy"], "a": "Surgery and medicine"}, {"id": 1141, "q": "Which Indian philosophy focuses on cause and effect and is considered dualistic in nature?", "o": ["Samkhya", "Vedanta", "Mimamsa", "Charvaka"], "a": "Samkhya"}, {"id": 1142, "q": "Which of the following was an ancient Indian center of learning located in present-day Pakistan?", "o": ["Takshashila", "Nalanda", "Vikramashila", "Ujjain"], "a": "Takshashila"}, {"id": 1143, "q": "The concept of 'Rasa' in Indian aesthetics refers to which of the following?", "o": ["Ayurvedic medicine preparation", "The essence or sentiment in performing arts", "A type of Indian dance form", "A Vedic ritual"], "a": "The essence or sentiment in performing arts"}, {"id": 1144, "q": "Who composed the classical Sanskrit play 'Shakuntala'?", "o": ["Kalidasa", "Bharata Muni", "Valmiki", "Tulsidas"], "a": "Kalidasa"}, {"id": 1145, "q": "Which ancient Indian scripture describes the duties and responsibilities of a ruler?", "o": ["Manusmriti", "Arthashastra", "Vedas", "Upanishads"], "a": "Arthashastra"}, {"id": 1146, "q": "Which text is considered the foundational scripture of the Samkhya philosophy?", "o": ["Yoga Sutras", "Samkhya Karika", "Vedanta Sutra", "Bhagavad Gita"], "a": "Samkhya Karika"}, {"id": 1147, "q": "Which ancient Indian text is known as the \"Fifth Veda\" due to its comprehensive nature?", "o": ["Bhagavad Gita", "Natya Shastra", "Upanishads", "Mahabharata"], "a": "Mahabharata"}, {"id": 1148, "q": "The concept of 'Karma' in Indian philosophy primarily refers to:", "o": ["Fate predetermined by the gods", "The law of cause and effect governing actions", "Ritualistic sacrifices", "The pursuit of pleasure"], "a": "The law of cause and effect governing actions"}, {"id": 1149, "q": "Who is considered the father of Ayurveda?", "o": ["Charaka", "Sushruta", "Nagarjuna", "Brahmagupta"], "a": "Charaka"}, {"id": 1150, "q": "Which Indian scripture is primarily a dialogue between Nachiketa and Yama (the god of death)?", "o": ["Katha Upanishad", "Mundaka Upanishad", "Bhagavad Gita", "Brahma Sutra"], "a": "Katha Upanishad"}, {"id": 1151, "q": "Which of the following is NOT a traditional Indian martial art?", "o": ["Kalaripayattu", "Silambam", "Gatka", "Judo"], "a": "Judo"}, {"id": 1152, "q": "The 'Puranas' primarily deal with:", "o": ["History, mythology, and cosmology", "Military strategies", "Medical sciences", "Grammar and linguistics"], "a": "History, mythology, and cosmology"}, {"id": 1153, "q": "Which ancient Indian text describes the laws of motion and gravity before Newton?", "o": ["Surya Siddhanta", "Charaka Samhita", "Arthashastra", "Nyaya Sutra"], "a": "Surya Siddhanta"}, {"id": 1154, "q": "What is the literal meaning of 'Vedanta'?", "o": ["End of the Vedas", "Science of life", "Cosmic order", "Sacred law"], "a": "End of the Vedas"}, {"id": 1155, "q": "Which Indian philosophy emphasizes devotion (bhakti) as a path to liberation?", "o": ["Vedanta", "Bhakti Yoga", "Nyaya", "Charvaka"], "a": "Bhakti Yoga"}];
+
+        // Core Global States
+        let userAnswers = {};
+        let currentActiveQuizRun = [];
+        let currentStudentName = "";
+        let currentStudentId = "";
+        let currentModuleKey = ""; // "ES" or "IKS"
+
+        let timerIntervalId = null;
+        let totalSecondsRemaining = 0;
+        const QUIZ_DURATION_SECONDS = 3 * 60 * 60; // 3 Hours
+        const PROFILE_KEY = 'beprepare_student_profile';
+
+        // Dark / Light Toggle Switch Controller
+        function toggleThemeMode() {
+            const htmlNode = document.documentElement;
+            if (htmlNode.classList.contains('dark')) {
+                htmlNode.classList.remove('dark');
+                localStorage.setItem('theme_preference', 'light');
+            } else {
+                htmlNode.classList.add('dark');
+                localStorage.setItem('theme_preference', 'dark');
+            }
+        }
+
+        function initSavedThemePreference() {
+            const saved = localStorage.getItem('theme_preference');
+            const htmlNode = document.documentElement;
+            if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                htmlNode.classList.add('dark');
+            } else {
+                htmlNode.classList.remove('dark');
+            }
+        }
+
+        // ----- Student Profile (Login) Handling -----
+        function loadStudentProfile() {
+            const raw = localStorage.getItem(PROFILE_KEY);
+            if (!raw) return null;
+            try {
+                const data = JSON.parse(raw);
+                if (data && data.name && data.id) return data;
+            } catch (e) {}
+            return null;
+        }
+
+        function applyStudentProfile(profile) {
+            currentStudentName = profile.name;
+            currentStudentId = profile.id;
+            const badge = document.getElementById('header-student-badge');
+            badge.classList.remove('hidden');
+            badge.classList.add('flex');
+            document.getElementById('header-student-name').innerText = profile.name;
+            document.getElementById('header-student-id').innerText = profile.id;
+            const navActions = document.getElementById('header-nav-actions');
+            navActions.classList.remove('hidden');
+            navActions.classList.add('flex');
+        }
+
+        function handleLoginSubmit() {
+            const name = document.getElementById('login-input-name').value.trim();
+            const id = document.getElementById('login-input-id').value.trim();
+            const errorEl = document.getElementById('login-error');
+
+            if (!name || !id) {
+                errorEl.classList.remove('hidden');
+                return;
+            }
+            errorEl.classList.add('hidden');
+
+            const profile = { name, id };
+            localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+            applyStudentProfile(profile);
+            showView('dashboard');
+        }
+
+        function openEditProfile() {
+            document.getElementById('edit-input-name').value = currentStudentName;
+            document.getElementById('edit-input-id').value = currentStudentId;
+            document.getElementById('modal-edit-profile').classList.remove('hidden');
+        }
+
+        function closeEditProfile() {
+            document.getElementById('modal-edit-profile').classList.add('hidden');
+        }
+
+        function saveEditProfile() {
+            const name = document.getElementById('edit-input-name').value.trim();
+            const id = document.getElementById('edit-input-id').value.trim();
+            if (!name || !id) {
+                alert("Please fill in both your name and student ID.");
+                return;
+            }
+            const profile = { name, id };
+            localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+            applyStudentProfile(profile);
+            closeEditProfile();
+        }
+
+        // Router engine view rules
+        function showView(viewId) {
+            ['login','dashboard','quiz','results'].forEach(v => {
+                document.getElementById(`view-${v}`).classList.add('hidden');
+            });
+
+            document.getElementById(`view-${viewId}`).classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            if (viewId === 'dashboard') {
+                const profile = loadStudentProfile();
+                if (profile) {
+                    document.getElementById('dashboard-greeting').innerText =
+                        `Welcome back, ${profile.name}! Select a module below to start a fresh, shuffled practice attempt.`;
+                }
+                renderHistory();
+            }
+        }
+
+        function handleLogoClick() {
+            if (!document.getElementById('view-quiz').classList.contains('hidden')) {
+                if (confirm("An active assessment runtime session is running. Leaving this page drops current progress! Continue exit routing?")) {
+                    clearInterval(timerIntervalId);
+                    showView('dashboard');
+                }
+            } else {
+                const profile = loadStudentProfile();
+                if (profile) showView('dashboard');
+            }
+        }
+
+        // Launch test directly using saved profile (no re-entry of name/ID required)
+        function launchTest(moduleKey) {
+            const profile = loadStudentProfile();
+            if (!profile) {
+                showView('login');
+                return;
+            }
+            currentModuleKey = moduleKey;
+            currentStudentName = profile.name;
+            currentStudentId = profile.id;
+            startQuiz();
+        }
+
+        function reAttemptCurrentModule() {
+            if (currentModuleKey) {
+                launchTest(currentModuleKey);
+            } else {
+                showView('dashboard');
+            }
+        }
+
+        // Shuffling Engine
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Initialize Evaluation Loop
+        function startQuiz() {
+            userAnswers = {};
+
+            // Render Profile Badges
+            document.getElementById('display-student-name').innerText = currentStudentName;
+            document.getElementById('display-student-id').innerText = currentStudentId;
+
+            // Pick Target Question Bank Module
+            let sourceBank = (currentModuleKey === 'IKS') ? iksQuestionBank : esQuestionBank;
+            document.getElementById('quiz-title-display').innerText = `${currentModuleKey} Comprehensive Examination Module`;
+            document.getElementById('quiz-total-badge').innerText = `Total Items: ${sourceBank.length}`;
+
+            // Clone and deep shuffle question metrics arrays
+            let clonedBank = JSON.parse(JSON.stringify(sourceBank));
+            currentActiveQuizRun = shuffleArray(clonedBank);
+
+            const formContainer = document.getElementById('quiz-questions-form');
+            formContainer.innerHTML = '';
+
+            currentActiveQuizRun.forEach((item, index) => {
+                let shuffledOptions = shuffleArray([...item.o]);
+
+                const qCard = document.createElement('div');
+                qCard.className = "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 shadow-sm space-y-4 transition-colors duration-200 fade-in";
+                qCard.setAttribute('data-question-id', item.id);
+
+                const header = document.createElement('div');
+                header.className = "flex items-start gap-3";
+                header.innerHTML = `
+                    <span class="bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs px-2.5 py-1 rounded-md mt-0.5">Q${index + 1}</span>
+                    <p class="font-semibold text-slate-800 dark:text-white text-base">${escapeHTML(item.q)}</p>
+                `;
+                qCard.appendChild(header);
+
+                const optionsContainer = document.createElement('div');
+                optionsContainer.className = "grid grid-cols-1 sm:grid-cols-2 gap-3 pl-9";
+
+                shuffledOptions.forEach((opt) => {
+                    const label = document.createElement('label');
+                    label.className = "flex items-center gap-3 p-3 border border-slate-200 dark:border-slate-700 rounded-lg cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50 transition group";
+
+                    const radio = document.createElement('input');
+                    radio.type = "radio";
+                    radio.name = `question-${item.id}`;
+                    radio.value = opt;
+                    radio.className = "w-4 h-4 text-indigo-600 border-slate-300 dark:border-slate-600 focus:ring-indigo-500";
+
+                    radio.onchange = function() {
+                        userAnswers[item.id] = this.value;
+                        updateProgressBar();
+
+                        optionsContainer.querySelectorAll('label').forEach(lbl => lbl.className = "flex items-center gap-3 p-3 border border-slate-200 dark:border-slate-700 rounded-lg cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50 transition group");
+                        if(this.checked) {
+                            label.className = "flex items-center gap-3 p-3 border-2 border-indigo-600 dark:border-indigo-400 bg-indigo-50/50 dark:bg-indigo-950/20 rounded-lg cursor-pointer transition group";
+                        }
+                    };
+
+                    label.appendChild(radio);
+
+                    const optText = document.createElement('span');
+                    optText.className = "text-sm text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white font-medium";
+                    optText.innerText = opt;
+                    label.appendChild(optText);
+
+                    optionsContainer.appendChild(label);
+                });
+
+                qCard.appendChild(optionsContainer);
+                formContainer.appendChild(qCard);
+            });
+
+            updateProgressBar();
+            initializeTimer();
+            showView('quiz');
+        }
+
+        function updateProgressBar() {
+            const answeredCount = Object.keys(userAnswers).length;
+            const total = currentActiveQuizRun.length;
+            document.getElementById('quiz-completion-status').innerText = `${answeredCount} of ${total} Questions Answered`;
+        }
+
+        // Live Countdown Engine
+        function initializeTimer() {
+            if (timerIntervalId) clearInterval(timerIntervalId);
+
+            totalSecondsRemaining = QUIZ_DURATION_SECONDS;
+            renderTimerString();
+
+            timerIntervalId = setInterval(() => {
+                totalSecondsRemaining--;
+                renderTimerString();
+
+                if (totalSecondsRemaining <= 0) {
+                    clearInterval(timerIntervalId);
+                    alert("3-Hour time limit boundary exceeded! Compiling active selections automatically.");
+                    executeCompilation();
+                }
+            }, 1000);
+        }
+
+        function renderTimerString() {
+            const hrs = Math.floor(totalSecondsRemaining / 3600);
+            const mins = Math.floor((totalSecondsRemaining % 3600) / 60);
+            const secs = totalSecondsRemaining % 60;
+
+            const pad = (num) => String(num).padStart(2, '0');
+            document.getElementById('quiz-timer-countdown').innerText = `${pad(hrs)}:${pad(mins)}:${pad(secs)}`;
+        }
+
+        function submitQuiz() {
+            const total = currentActiveQuizRun.length;
+            const answeredCount = Object.keys(userAnswers).length;
+
+            if (answeredCount < total) {
+                if (!confirm(`You have only completed ${answeredCount} out of ${total} questions. Finalize submission?`)) {
+                    return;
+                }
+            }
+            executeCompilation();
+        }
+
+        // Compile and Record Telemetry
+        function executeCompilation() {
+            clearInterval(timerIntervalId);
+            const total = currentActiveQuizRun.length;
+            let computedScore = 0;
+
+            const ticketsContainer = document.getElementById('results-tickets-container');
+            ticketsContainer.innerHTML = '';
+
+            document.getElementById('result-title-display').innerText = `${currentModuleKey} Performance Diagnostics Overview`;
+
+            currentActiveQuizRun.forEach((item, index) => {
+                const selected = userAnswers[item.id] || null;
+                const isCorrect = (selected === item.a);
+                if (isCorrect) computedScore++;
+
+                const ticket = document.createElement('div');
+                ticket.className = `border rounded-xl p-5 bg-white dark:bg-slate-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all duration-200 ${
+                    isCorrect ? 'border-l-4 border-l-emerald-500 border-slate-200 dark:border-slate-700' : 'border-l-4 border-l-rose-500 border-slate-200 dark:border-slate-700'
+                }`;
+
+                const leftCol = document.createElement('div');
+                leftCol.className = "space-y-2 flex-grow";
+                leftCol.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-bold px-2 py-0.5 rounded ${isCorrect ? 'bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400' : 'bg-rose-50 dark:bg-rose-950 text-rose-700 dark:text-rose-400'}">
+                            Question ${index + 1} -> ${isCorrect ? 'Correct (+1)' : 'Incorrect (0)'}
+                        </span>
+                    </div>
+                    <p class="font-medium text-slate-800 dark:text-white text-sm sm:text-base">${escapeHTML(item.q)}</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-1">
+                        <div class="bg-slate-50 dark:bg-slate-700 p-2 rounded border border-slate-100 dark:border-slate-600">
+                            <span class="text-slate-400 dark:text-slate-400 block font-semibold">YOUR RESPONSE</span>
+                            <span class="${isCorrect ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-rose-600 dark:text-rose-400 font-bold'}">${selected ? escapeHTML(selected) : '[No Selection Formed]'}</span>
+                        </div>
+                        <div class="bg-slate-50 dark:bg-slate-700 p-2 rounded border border-slate-100 dark:border-slate-600">
+                            <span class="text-slate-400 dark:text-slate-400 block font-semibold">VALID EXPECTED BACKEND ANSWER</span>
+                            <span class="text-emerald-600 dark:text-emerald-400 font-semibold">${escapeHTML(item.a)}</span>
+                        </div>
+                    </div>
+                `;
+
+                const rightCol = document.createElement('div');
+                rightCol.className = "flex items-center justify-end shrink-0";
+                rightCol.innerHTML = isCorrect
+                    ? `<div class="bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300 rounded-full w-10 h-10 flex items-center justify-center shadow-inner"><i class="fa-solid fa-check text-lg"></i></div>`
+                    : `<div class="bg-rose-100 dark:bg-rose-900 text-rose-700 dark:text-rose-300 rounded-full w-10 h-10 flex items-center justify-center shadow-inner"><i class="fa-solid fa-xmark text-lg"></i></div>`;
+
+                ticket.appendChild(leftCol);
+                ticket.appendChild(rightCol);
+                ticketsContainer.appendChild(ticket);
+            });
+
+            const pct = ((computedScore / total) * 100).toFixed(1);
+            document.getElementById('result-score-fraction').innerText = `${computedScore}/${total}`;
+            document.getElementById('result-percentage').innerText = `${pct}%`;
+
+            // Commit record array back to LocalStorage stack
+            const newRecord = {
+                timestamp: new Date().toLocaleString(),
+                studentName: currentStudentName,
+                studentId: currentStudentId,
+                moduleName: `${currentModuleKey} Practice Test`,
+                score: computedScore,
+                totalItems: total,
+                percentage: pct
+            };
+
+            let historicalRecords = JSON.parse(localStorage.getItem('beprepare_results')) || [];
+            historicalRecords.unshift(newRecord);
+            localStorage.setItem('beprepare_results', JSON.stringify(historicalRecords));
+
+            showView('results');
+        }
+
+        // Render Storage Arrays History Panel
+        function renderHistory() {
+            const records = JSON.parse(localStorage.getItem('beprepare_results')) || [];
+            const emptyState = document.getElementById('history-empty');
+            const tableContainer = document.getElementById('history-table-container');
+            const rowsContainer = document.getElementById('history-rows');
+
+            rowsContainer.innerHTML = '';
+
+            if (records.length === 0) {
+                emptyState.classList.remove('hidden');
+                tableContainer.classList.add('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                tableContainer.classList.remove('hidden');
+
+                records.forEach((rec) => {
+                    const row = document.createElement('tr');
+                    row.className = "hover:bg-slate-50/80 dark:hover:bg-slate-700/50 transition";
+
+                    const isPassed = parseFloat(rec.percentage) >= 50.0;
+
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap text-slate-500 dark:text-slate-400 text-xs font-medium">${rec.timestamp}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-semibold text-slate-900 dark:text-white">${escapeHTML(rec.studentName || 'Guest')}</div>
+                            <div class="text-xs text-slate-400 dark:text-slate-400 font-mono">${escapeHTML(rec.studentId || 'N/A')}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap font-medium text-slate-700 text-xs">
+                            <span class="px-2 py-1 rounded font-bold text-[11px] ${rec.moduleName.includes('IKS') ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800' : 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'}">
+                                ${escapeHTML(rec.moduleName)}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-slate-700 dark:text-slate-300 font-medium">${rec.score} / ${rec.totalItems}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="text-sm font-bold ${isPassed ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}">${rec.percentage}%</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="w-24 bg-slate-100 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
+                                <div class="h-full ${isPassed ? 'bg-emerald-500' : 'bg-amber-500'}" style="width: ${rec.percentage}%"></div>
+                            </div>
+                        </td>
+                    `;
+                    rowsContainer.appendChild(row);
+                });
+            }
+        }
+
+        function clearHistory() {
+            if (confirm("Are you sure you want to completely erase your past local performance profiles?")) {
+                localStorage.removeItem('beprepare_results');
+                renderHistory();
+            }
+        }
+
+        function escapeHTML(str) {
+            return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        window.onload = function() {
+            initSavedThemePreference();
+            const profile = loadStudentProfile();
+            if (profile) {
+                applyStudentProfile(profile);
+                showView('dashboard');
+            } else {
+                showView('login');
+            }
+        };
+    </script>
+</body>
+</html>
